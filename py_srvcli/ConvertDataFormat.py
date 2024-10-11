@@ -137,6 +137,7 @@ def convertFromFileToROSServiceFormat(waypoint_graph_file_location,orders_file_l
     orderFile=loadFile(orders_file_location)
     vehicleFile=loadFile(vehicle_data_location)
     waypoint_graph_locations=waypointGraphFile["node_locations"]
+    print(waypoint_graph_locations)
     waypoint_graph_edges,waypoint_graph_offsets=convertGraphFileToCSR(waypointGraphFile)
     waypoint_graph_edges=waypoint_graph_edges.tolist()
     waypoint_graph_offsets=waypoint_graph_offsets.tolist()
