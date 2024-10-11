@@ -12,7 +12,8 @@ class MinimalClientAsync(Node):
         self.cli = self.create_client(ORAgentMsg, 'ORAgent')       # CHANGE
         while not self.cli.wait_for_service(timeout_sec=1.0):
             self.get_logger().info('service not available, waiting again...')
-        self.req = ORAgentMsg.Request()                                   # CHANGE
+        self.req = ORAgentMsg.Request()
+                                           # CHANGE
 
     def send_request(self):
         waypoint_graph_file_location=sys.argv[1]
@@ -38,8 +39,8 @@ def main(args=None):
                     'Service call failed %r' % (e,))
             else:
                 minimal_client.get_logger().info(
-                    'Routes: '+response.routes_node_index+"\nRoutesWithLocations"
-                    +response.routes_location
+                    'Routes: '+str(response.routes_node_index)+"\nRoutesWithLocations"
+                    +str(response.routes_location)
                     )  # CHANGE
             break
 

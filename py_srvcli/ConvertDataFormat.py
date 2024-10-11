@@ -2,6 +2,7 @@ import json
 import numpy as np
 import FindPath
 
+
 def loadFile(file_path):
     with open(file_path, 'r') as file:
         data = json.load(file)
@@ -43,7 +44,7 @@ def calculateGraphWeightByFile(graphfile):
     return weights
 
 def caluclateGraphWeightByValue(waypoint_graph_locations,waypoint_graph_edges,waypoint_graph_offsets):
-    nodeLen=len(waypoint_graph_locations)/2
+    nodeLen=int(len(waypoint_graph_locations)/3)
     weights=[]
     for startnode in range(nodeLen):
         offset=waypoint_graph_offsets[startnode]
@@ -51,11 +52,15 @@ def caluclateGraphWeightByValue(waypoint_graph_locations,waypoint_graph_edges,wa
             nextoffset=waypoint_graph_offsets[startnode+1]
         else:
             nextoffset=len(waypoint_graph_edges)
-        endNodes=waypoint_graph_edges[offset:nextoffset]
 
+        endNodes=waypoint_graph_edges[offset:nextoffset]
+        startlocation=waypoint_graph_locations[startnode*3:startnode*3+3]
+        if(len(endNodes)==0):
+            continue
         for endnode in endNodes:
-            startlocation=[waypoint_graph_locations[startnode*2],waypoint_graph_locations[startnode*2+1]]
-            endlocation=[waypoint_graph_locations[endnode*2],waypoint_graph_locations[endnode*2+1]]
+            endlocation=waypoint_graph_locations[endnode*3:endnode*3+3]
+            if(len(endlocation)==0):
+                continue
             weights.append(calculateDistance(startlocation,endlocation))
     return weights
 
@@ -63,17 +68,21 @@ def caluclateGraphWeightByValue(waypoint_graph_locations,waypoint_graph_edges,wa
 
 def findOrderRelativeToNodeIndexByFile(orderlocation,graphFile):
     for index,nodeLocation in enumerate(graphFile["node_locations"]):
-        if(abs(nodeLocation[0]-orderlocation[0])<1 and abs(nodeLocation[1]-orderlocation[1])<1 and abs(nodeLocation[2]-orderlocation[2])<1):
+        if(abs(nodeLocation[0]-orderlocation[0])<1.0 and abs(nodeLocation[1]-orderlocation[1])<1.0 and abs(nodeLocation[2]-orderlocation[2])<1.0):
             return index
         
 def findOrderRelativeToNodeIndexByValue(orderlocation,waypoint_graph_locations):
-    nodeLen=len(waypoint_graph_locations)/2
-    for index in range(nodeLen+1):
-        nodeLocation=[waypoint_graph_locations[index],waypoint_graph_locations[index+1]]
-        if(abs(nodeLocation[0]-orderlocation[0])<1 and abs(nodeLocation[1]-orderlocation[1])<1 and abs(nodeLocation[2]-orderlocation[2])<1):
+    nodeLen=int(len(waypoint_graph_locations)/3)
+    for index in range(nodeLen):
+        nodeLocation=waypoint_graph_locations[index*3:index*3+3]
+        print(nodeLocation)
+        print(abs(nodeLocation[0]-orderlocation[0]))
+        print(abs(nodeLocation[1]-orderlocation[1]))
+        print(abs(nodeLocation[2]-orderlocation[2]))
+        if(abs(nodeLocation[0]-orderlocation[0])<1.0 and abs(nodeLocation[1]-orderlocation[1])<1.0 and abs(nodeLocation[2]-orderlocation[2])<1.0):
             return index
 
-    return -1
+    raise RuntimeError("FailedToFindCompatiableOrders")
 
 
 def convertOrdersDataByFile(ordersdata,graphFile):
@@ -84,17 +93,17 @@ def convertOrdersDataByFile(ordersdata,graphFile):
     return orders
 
 def convertOrdersDataByValue(ordersLocation,waypoint_graph_locations):
-    orderLen=len(ordersLocation)/2
+    orderLen=int(len(ordersLocation)/3)
     orders=[]
-    for index in range(orderLen+1):
-        orderlocation=[ordersLocation[index],ordersLocation[index+1]]
+    for index in range(orderLen):
+        orderlocation=ordersLocation[index*3:index*3+3]
+        print(orderlocation)
         index=findOrderRelativeToNodeIndexByValue(orderlocation,waypoint_graph_locations)
         orders.append(index)
     return orders
 
 
 def convertGraphData(graphfile):
-    print(type(graphfile))
     offsets, edges = convertGraphFileToCSR(graphfile)
     weights=calculateGraphWeightByFile(graphfile)
     return offsets, edges, weights
@@ -115,7 +124,8 @@ def preprocess(graphfilelocation,ordersfilelocation):
 
 def preprocessROS(waypoint_graph_locations,waypoint_graph_edges,waypoint_graph_offsets,task_locations,vehicle_start_location):
     weights=caluclateGraphWeightByValue(waypoint_graph_locations,waypoint_graph_edges,waypoint_graph_offsets)
-    orders=convertOrdersDataByValue(task_locations,vehicle_start_location)
+    orders=convertOrdersDataByValue(task_locations,waypoint_graph_locations)
+
     vehicleStartNodeIndex=findOrderRelativeToNodeIndexByValue(vehicle_start_location,waypoint_graph_locations)
     if(vehicleStartNodeIndex==-1):
         orders.insert(0,0)
@@ -127,9 +137,14 @@ def preprocessROS(waypoint_graph_locations,waypoint_graph_edges,waypoint_graph_o
 def convertSolutionPathToLocation(solutionpath,waypoint_graph_locations):
     solutionPathWithLocations=[]
     for node in solutionpath:
-        solutionPathWithLocations.push(waypoint_graph_locations[node*2])
-        solutionPathWithLocations.push(waypoint_graph_locations[node*2+1])
+        solutionPathWithLocations+=waypoint_graph_locations[node*3:node*3+3]
     return solutionPathWithLocations
+
+def convertFrom2DListTo1D(list):
+    plainList=[]
+    for item in list:
+        plainList+=item
+    return plainList
 
 
 def convertFromFileToROSServiceFormat(waypoint_graph_file_location,orders_file_location,vehicle_data_location):
@@ -137,11 +152,15 @@ def convertFromFileToROSServiceFormat(waypoint_graph_file_location,orders_file_l
     orderFile=loadFile(orders_file_location)
     vehicleFile=loadFile(vehicle_data_location)
     waypoint_graph_locations=waypointGraphFile["node_locations"]
-    print(waypoint_graph_locations)
+    waypoint_graph_locations=list(map(float,convertFrom2DListTo1D(waypoint_graph_locations)))
+
     waypoint_graph_edges,waypoint_graph_offsets=convertGraphFileToCSR(waypointGraphFile)
     waypoint_graph_edges=waypoint_graph_edges.tolist()
     waypoint_graph_offsets=waypoint_graph_offsets.tolist()
+
     task_locations=orderFile["task_locations"]
-    vehicle_start_location=vehicleFile["vehicle_locations"][0]
+    task_locations=list(map(float,convertFrom2DListTo1D(task_locations)))
+
+    vehicle_start_location=list(map(float,vehicleFile["vehicle_locations"][0]))
     
     return waypoint_graph_locations,waypoint_graph_edges,waypoint_graph_offsets,task_locations,vehicle_start_location
