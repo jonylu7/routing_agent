@@ -1,4 +1,4 @@
-from simple_interfaces.srv import ORAgentMSg               # CHANGE
+from simple_interfaces.srv import ORAgentMsg               # CHANGE
 import sys
 import rclpy
 from rclpy.node import Node
@@ -9,10 +9,10 @@ class MinimalClientAsync(Node):
 
     def __init__(self):
         super().__init__('minimal_client_async')
-        self.cli = self.create_client(ORAgentMSg, 'ORAgent')       # CHANGE
+        self.cli = self.create_client(ORAgentMsg, 'ORAgent')       # CHANGE
         while not self.cli.wait_for_service(timeout_sec=1.0):
             self.get_logger().info('service not available, waiting again...')
-        self.req = ORAgentMSg.Request()                                   # CHANGE
+        self.req = ORAgentMsg.Request()                                   # CHANGE
 
     def send_request(self):
         waypoint_graph_file_location=sys.argv[1]

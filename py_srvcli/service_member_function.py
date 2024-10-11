@@ -1,4 +1,4 @@
-from simple_interfaces.srv import ORAgentMSg  # CHANGE
+from simple_interfaces.srv import ORAgentMsg  # CHANGE
 import rclpy
 from rclpy.node import Node
 import ORAgentClient
