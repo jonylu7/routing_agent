@@ -30,8 +30,9 @@ def runORAgentByROS(waypoint_graph_locations,waypoint_graph_edges,waypoint_graph
 
     solution,totalCost=OR.solveTSP(costmatrix,orders)
     solutionPath=OR.generateSolution(pathmatrix, solution)
+    solPathLocations=ConvertDataFormat.convertSolutionPathToLocation(solutionPath)
 
-    return solutionPath,
+    return solutionPath,solPathLocations
 
 if __name__=="__main__":
     runORAgentByFile(graph_file_location,orders_file_location,vehicle_file_location,export_file_location)

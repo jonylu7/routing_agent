@@ -124,5 +124,23 @@ def preprocessROS(waypoint_graph_locations,waypoint_graph_edges,waypoint_graph_o
     return weights,orders
 
 
-def convertSolutionPathIndexToLocation():
+def convertSolutionPathToLocation(solutionpath,waypoint_graph_locations):
+    solutionPathWithLocations=[]
+    for node in solutionpath:
+        solutionPathWithLocations.push(waypoint_graph_locations[node*2])
+        solutionPathWithLocations.push(waypoint_graph_locations[node*2+1])
+    return solutionPathWithLocations
+
+
+def convertFromFileToROSServiceFormat(waypoint_graph_file_location,orders_file_location,vehicle_data_location):
+    waypointGraphFile=loadFile(waypoint_graph_file_location)
+    orderFile=loadFile(orders_file_location)
+    vehicleFile=loadFile(vehicle_data_location)
+    waypoint_graph_locations=waypointGraphFile["node_locations"]
+    waypoint_graph_edges,waypoint_graph_offsets=convertGraphFileToCSR(waypointGraphFile)
+    waypoint_graph_edges=waypoint_graph_edges.tolist()
+    waypoint_graph_offsets=waypoint_graph_offsets.tolist()
+    task_locations=orderFile["task_locations"]
+    vehicle_start_location=vehicleFile["vehicle_locations"][0]
     
+    return waypoint_graph_locations,waypoint_graph_edges,waypoint_graph_offsets,task_locations,vehicle_start_location
