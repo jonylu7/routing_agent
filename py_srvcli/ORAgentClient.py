@@ -24,9 +24,6 @@ def runORAgentByROS(waypoint_graph_locations,waypoint_graph_edges,waypoint_graph
     weights,orders=ConvertDataFormat.preprocessROS(waypoint_graph_locations,waypoint_graph_edges,waypoint_graph_offsets,task_locations,vehicle_start_location)
 
     costmatrix,pathmatrix=ConvertDataFormat.generateMatrix(waypoint_graph_offsets,waypoint_graph_edges,weights)
-    print(weights)
-    print(orders)
-    print(costmatrix)
 
     solution,totalCost=OR.solveTSP(costmatrix,orders)
     solutionPath=OR.generateSolution(pathmatrix, solution)

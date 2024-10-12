@@ -22,11 +22,10 @@ def convertGraphFileToCSR(graphfile):
         edges = edges + graphfile["graph"][str(node)]["edges"]
 
     offsets.append(cur_offset)
-    return np.array(offsets), np.array(edges)
+    return  np.array(edges),np.array(offsets),
 
 def generateMatrix(offsets,edges,weights):
     graph=FindPath.convertFromCSRToDijGraph(offsets,edges,weights)
-
     costmatrix,pathmatrix=FindPath.findAllShortestPath(graph)
     return costmatrix,pathmatrix
 
@@ -75,10 +74,6 @@ def findOrderRelativeToNodeIndexByValue(orderlocation,waypoint_graph_locations):
     nodeLen=int(len(waypoint_graph_locations)/3)
     for index in range(nodeLen):
         nodeLocation=waypoint_graph_locations[index*3:index*3+3]
-        print(nodeLocation)
-        print(abs(nodeLocation[0]-orderlocation[0]))
-        print(abs(nodeLocation[1]-orderlocation[1]))
-        print(abs(nodeLocation[2]-orderlocation[2]))
         if(abs(nodeLocation[0]-orderlocation[0])<1.0 and abs(nodeLocation[1]-orderlocation[1])<1.0 and abs(nodeLocation[2]-orderlocation[2])<1.0):
             return index
 
@@ -97,7 +92,6 @@ def convertOrdersDataByValue(ordersLocation,waypoint_graph_locations):
     orders=[]
     for index in range(orderLen):
         orderlocation=ordersLocation[index*3:index*3+3]
-        print(orderlocation)
         index=findOrderRelativeToNodeIndexByValue(orderlocation,waypoint_graph_locations)
         orders.append(index)
     return orders
