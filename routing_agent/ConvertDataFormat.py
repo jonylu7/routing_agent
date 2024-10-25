@@ -145,9 +145,6 @@ def convertFrom2DListTo1D(list):
         plainList+=item
     return plainList
 
-
-
-
 def convertFromFileToROSServiceFormat(waypoint_graph_file_location,orders_file_location,vehicle_data_location):
     waypointGraphFile=loadJSONFile(waypoint_graph_file_location)
     orderFile=loadJSONFile(orders_file_location)
@@ -171,3 +168,23 @@ def readRequestFiles(waypoint_graph_file_location,orders_file_location,vehicle_d
     orderData=loadJSONIntoStr(orders_file_location)
     vehicleData=loadJSONIntoStr(vehicle_data_location)
     return waypointGraphData,orderData,vehicleData
+
+def mergeWaypointGraph(waypoint_graph_file_data):
+    
+
+    # shift map_1:[0,50]
+    mapDict={"map_1":[1,23]}
+    
+    return 
+
+
+def isWithInRange(index,mapRange)->bool:
+    if index>=mapRange[0] and index<=mapRange[1]:
+        return True
+    else:
+        return False
+
+def splitWaypointGraph():
+    isWithInRange(3,[1,2])
+    return
+    
