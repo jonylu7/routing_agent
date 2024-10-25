@@ -1,6 +1,6 @@
 from setuptools import find_packages, setup
 
-package_name = 'py_srvcli'
+package_name = 'routing_agent'
 
 setup(
     name=package_name,
@@ -10,13 +10,11 @@ setup(
         ('share/ament_index/resource_index/packages',
             ['resource/' + package_name]),
         ('share/' + package_name, ['package.xml']),
-        ('lib/' + package_name, [package_name+'/ORAgentClientInit.py']),
-        ('lib/' + package_name, [package_name+'/ORAgentClient.py']),
-        ('lib/' + package_name, [package_name+'/ClientToolkit.py']),
+        ('lib/' + package_name, [package_name+'/RoutingAgent.py']),
         ('lib/' + package_name, [package_name+'/ConvertDataFormat.py']),
         ('lib/' + package_name, [package_name+'/FindPath.py']),
         ('lib/' + package_name, [package_name+'/OR.py']),
-        ('lib/' + package_name, [package_name+'/ORExport.py']),
+        ('lib/' + package_name, [package_name+'/RoutingAgentExport.py']),
     ],
     install_requires=['setuptools'],
     zip_safe=True,
@@ -27,8 +25,10 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-            'service = py_srvcli.service_member_function:main',
-            'client = py_srvcli.client_member_function:main'
+            'service = routing_agent.service_member_function:main',
+            'userclient = routing_agent.client_member_function:userRunClient',
+            'navclient = routing_agent.client_member_function:navRunClient',
+            'test = routing_agent.test:main'
         ],
     },
 )
