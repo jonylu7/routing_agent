@@ -11,7 +11,7 @@ def runORAgentByFile(graph_file_location,orders_file_location,vehicle_file_locat
     ##preprocess
     offsets,edges,weights,orders=ConvertDataFormat.preprocess(graph_file_location,orders_file_location)
 
-    costmatrix,pathmatrix=ConvertDataFormat.generateMatrix(offsets,edges,weights)
+    costmatrix,pathmatrix=OR.generateMatrix(offsets,edges,weights)
 
 
     solution,totalCost=OR.solveTSP(costmatrix,orders)
@@ -22,7 +22,7 @@ def runORAgentByFile(graph_file_location,orders_file_location,vehicle_file_locat
 def runORAgentByROS(waypoint_graph_locations,waypoint_graph_edges,waypoint_graph_offsets,task_locations,vehicle_start_location):
     weights,orders=ConvertDataFormat.preprocessROS(waypoint_graph_locations,waypoint_graph_edges,waypoint_graph_offsets,task_locations,vehicle_start_location)
 
-    costmatrix,pathmatrix=ConvertDataFormat.generateMatrix(waypoint_graph_offsets,waypoint_graph_edges,weights)
+    costmatrix,pathmatrix=OR.generateMatrix(waypoint_graph_offsets,waypoint_graph_edges,weights)
 
     solution,totalCost=OR.solveTSP(costmatrix,orders)
     solutionPath=OR.generateSolution(pathmatrix, solution)
@@ -51,7 +51,7 @@ def runRoutingAgent(waypoint_graph_data,task_locations_data,vehicle_start_locati
     
     weights,orders=ConvertDataFormat.preprocessROS(waypoint_graph_locations,waypoint_graph_edges,waypoint_graph_offsets,task_locations,vehicle_start_location)
 
-    costmatrix,pathmatrix=ConvertDataFormat.generateMatrix(waypoint_graph_offsets,waypoint_graph_edges,weights)
+    costmatrix,pathmatrix=OR.generateMatrix(waypoint_graph_offsets,waypoint_graph_edges,weights)
 
     solution,totalCost=OR.solveTSP(costmatrix,orders)
     solutionPath=OR.generateSolution(pathmatrix, solution)

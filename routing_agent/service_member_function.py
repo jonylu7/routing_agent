@@ -4,11 +4,11 @@ from rclpy.node import Node
 import routing_agent.RoutingAgent as RoutingAgent
 
 
-class MinimalService(Node):
+class RoutingAgentService(Node):
     storedResponse=""
 
     def __init__(self):
-        super().__init__('minimal_service')
+        super().__init__('routing_service')
         self.srv = self.create_service(RoutingAgentMsg, 'RoutingAgent', self.RoutingAgentMsgCallback)       # CHANGE
 
     def RoutingAgentMsgCallback(self, request, response):
@@ -25,9 +25,9 @@ class MinimalService(Node):
 def main(args=None):
     rclpy.init(args=args)
 
-    minimal_service = MinimalService()
+    routing_service = RoutingAgentService()
 
-    rclpy.spin(minimal_service)
+    rclpy.spin(routing_service)
 
     rclpy.shutdown()
 

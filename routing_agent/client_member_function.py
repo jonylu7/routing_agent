@@ -31,7 +31,6 @@ class MinimalClientAsync(Node):
 
 
 
-
 def userRunClient(args=None):
     rclpy.init(args=args)
     minimal_client = MinimalClientAsync()

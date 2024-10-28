@@ -29,10 +29,7 @@ def convertGraphFileToCSR(graphfile):
     offsets.append(cur_offset)
     return  np.array(edges),np.array(offsets),
 
-def generateMatrix(offsets,edges,weights):
-    graph=FindPath.convertFromCSRToDijGraph(offsets,edges,weights)
-    costmatrix,pathmatrix=FindPath.findAllShortestPath(graph)
-    return costmatrix,pathmatrix
+
 
 
 def calculateDistance(location1,location2):
@@ -171,7 +168,7 @@ def readRequestFiles(waypoint_graph_file_location,orders_file_location,vehicle_d
 
 def mergeWaypointGraph(waypoint_graph_file_data):
     
-
+    
     # shift map_1:[0,50]
     mapDict={"map_1":[1,23]}
     

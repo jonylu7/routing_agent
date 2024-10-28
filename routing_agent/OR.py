@@ -1,6 +1,8 @@
 import elkai
 import numpy as np
 import json
+import FindPath
+
 def prunCostMatrix(costMatrix,orders):
     prunnedCostMatrix=[]
     for index,orderx in enumerate(orders):
@@ -42,8 +44,10 @@ def convertWaypointIndexsToLocations(waypointIndexs,nodeLocations):
         nodeLocations.append(nodeLocations[i])
     return nodeLocations
 
-
-
+def generateMatrix(offsets,edges,weights):
+    graph=FindPath.convertFromCSRToDijGraph(offsets,edges,weights)
+    costmatrix,pathmatrix=FindPath.findAllShortestPath(graph)
+    return costmatrix,pathmatrix
 
 
 
