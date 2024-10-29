@@ -160,13 +160,8 @@ def convertFromFileToROSServiceFormat(waypoint_graph_file_location,orders_file_l
     
     return waypoint_graph_locations,waypoint_graph_edges,waypoint_graph_offsets,task_locations,vehicle_start_location
 
-def readRequestFiles(waypoint_graph_file_location,orders_file_location,vehicle_data_location):
-    waypointGraphData=loadJSONIntoStr(waypoint_graph_file_location)
-    orderData=loadJSONIntoStr(orders_file_location)
-    vehicleData=loadJSONIntoStr(vehicle_data_location)
-    return waypointGraphData,orderData,vehicleData
 
-def mergeWaypointGraph(waypoint_graph_file_data):
+def mergeWaypointGraph(waypointGraphConfigs):
     
     
     # shift map_1:[0,50]

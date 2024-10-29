@@ -10,7 +10,7 @@ class NavClient(Node):
 
     def __init__(self):
         super().__init__('NavClient')
-        self.cli = self.create_client(NavServiceMsg, 'RoutingAgent')       # CHANGE
+        self.cli = self.create_client(NavServiceMsg, 'NavClient')       # CHANGE
         while not self.cli.wait_for_service(timeout_sec=1.0):
             self.get_logger().info('service not available, waiting again...')
         self.req = NavServiceMsg.Request()
@@ -36,11 +36,8 @@ def main(args=None):
                 navClient.get_logger().info(
                     'Service call failed %r' % (e,))
             else:
-                response_file_data=json.loads(response.response_file_data)
-                nl=response_file_data["node_locations"]
                 navClient.get_logger().info(
-                    'Routes: '+str(nl)+"\nRoutesWithLocations"
-                    )  # CHANGE
+                    'PathToNextTask: '+response.path_to_next_task+"\n")  # CHANGE
             break
 
     navClient.destroy_node()

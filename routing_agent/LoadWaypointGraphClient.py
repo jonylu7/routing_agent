@@ -18,7 +18,7 @@ class LoadWaypointGraphClient(Node):
                                            # CHANG
 
     def send_request(self):
-        self.req.can_go_to,self.req.task_locations_data,self.req.vehicle_start_locations_data="","",""                                     # CHANGE
+        self.req.waypoint_graph_data=ConvertDataFormat.loadJSONIntoStr(sys.argv[1])
         self.future = self.cli.call_async(self.req)
         
 
@@ -36,11 +36,12 @@ def main(args=None):
                 loadClient.get_logger().info(
                     'Service call failed %r' % (e,))
             else:
-                response_file_data=json.loads(response.response_file_data)
-                nl=response_file_data["node_locations"]
-                loadClient.get_logger().info(
-                    'Routes: '+str(nl)+"\nRoutesWithLocations"
-                    )  # CHANGE
+                if(response.can_load):
+                    loadClient.get_logger().info(
+                    'Load WaypointGraph Successfully')
+                else:
+                    loadClient.get_logger().info(
+                    'Load WaypointGraph Failed')
             break
 
     loadClient.destroy_node()

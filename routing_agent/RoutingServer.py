@@ -2,33 +2,38 @@ from routing_agent_interfaces.srv import RoutingServiceMsg,MergeWaypointGraphSer
 import rclpy
 from rclpy.node import Node
 import routing_agent.RoutingAgent as RoutingAgent
+import json
+import ConvertDataFormat
 
 
 class RoutingServer(Node):
     waypointGraphData=""
+    hasLoadedWaypointGraph=False
 
     def __init__(self):
         super().__init__('routing_service')
-        self.routingService = self.create_service(RoutingServiceMsg, 'RoutingService', self.RoutingServiceMsg)
-        #self.ORService=self.create_service()
-        #self.updateWaypointGraphService=self.create_service()
-        self.navService=self.create_service()
-        self.loadWaypointGraphService=self.create_service()  
-        self.routingService=self.create_service()     # CHANGE
+        self.loadWaypointGraphService=self.create_service(LoadWaypointGraphServiceMsg,"LoadWaypointGraphService",self.LoadWaypointGraphServiceCallBack)
+        self.mergeWaypointGraphService=self.create_service(MergeWaypointGraphServiceMsg,"MergeWaypointGraphService",self.MergeWaypointGraphServiceCallBack)
+        self.routingService = self.create_service(RoutingServiceMsg, 'RoutingService', self.RoutingServiceCallBack)
+        self.navService=self.create_service(NavServiceMsg,'NavService',self.NavServiceCallBack)
 
-    def RoutingServiceCallBack(self, request, response):
+
+    def MergeWaypointGraphServiceCallBack(self,request,response):
+        mapsConfigData=json.loads(request.maps_config_data)
+        response.can_merge,response.global_waypoint_graph_file_data=ConvertDataFormat.mergeWaypointGraph(mapsConfigData)
+        #stores at 
+        #self.response.global_waypoint_graph_file_location
         return response
-
-
-    def MergeWaypointGraphCallBack(self,request,response):
-        #send maps.config files
-        #success or not and stores at ? location
-        return response
-    def LoadWaypointGraphCallBack(self,request,response):
+    
+    def LoadWaypointGraphServiceCallBack(self,request,response):
         #load 
-        return 
+        
+        return response
+    
+    def RoutingServiceCallBack(self, request, response):
 
-    def NavCallBack(self,request,response):
+        return response
+    def NavServiceCallBack(self,request,response):
         #send "sucess" current map id local locations/ 
         # "failed" current map id local locations 
         # set occupied map and reroute again
@@ -36,9 +41,6 @@ class RoutingServer(Node):
         return response
 
         
-    
-
-    
 
 def main(args=None):
     rclpy.init(args=args)

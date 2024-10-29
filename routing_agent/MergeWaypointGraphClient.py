@@ -18,9 +18,19 @@ class MergeWaypointGraphClient(Node):
                                            # CHANG
 
     def send_request(self):
-        self.req.can_go_to,self.req.task_locations_data,self.req.vehicle_start_locations_data="","",""                                     # CHANGE
+        self.req.maps_config_data=self.loadMapsConfig(sys.argv[1])
         self.future = self.cli.call_async(self.req)
-        
+
+    def loadMapsConfig(self,filepath):
+        configData=ConvertDataFormat.loadJSONIntoStr(filepath)
+        for mapid in configData.keys():
+            mapPath=configData[mapid]["file_path"]
+            mapData=ConvertDataFormat.loadJSONIntoStr(mapPath)
+            configData[mapid]["file_data"]=mapData
+
+        return configData
+
+
 
 def main(args=None):
     rclpy.init(args=args)
@@ -36,11 +46,12 @@ def main(args=None):
                 mergeClient.get_logger().info(
                     'Service call failed %r' % (e,))
             else:
-                response_file_data=json.loads(response.response_file_data)
-                nl=response_file_data["node_locations"]
-                mergeClient.get_logger().info(
-                    'Routes: '+str(nl)+"\nRoutesWithLocations"
-                    )  # CHANGE
+                if(response.can_merge):
+                    mergeClient.get_logger().info(
+                    'Merge WaypointGraph Successfully')
+                else:
+                    mergeClient.get_logger().info(
+                    'Merge WaypointGraph Failed')
             break
 
     mergeClient.destroy_node()

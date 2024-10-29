@@ -25,10 +25,11 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-            'service = routing_agent.service_member_function:main',
-            'userclient = routing_agent.client_member_function:userRunClient',
-            'navclient = routing_agent.client_member_function:navRunClient',
-            'test = routing_agent.test:main'
+            'server = routing_agent.RoutingServer:main',
+            'routingClient = routing_agent.RoutingClient:main',
+            'loadGraph = routing_agent.LoadWaypointGraphClient:main',
+            'mergeGraph = routing_agent.MergeWaypointGraphClient:main',
+            'nav = routing_agent.NavClient:main',
         ],
     },
 )
