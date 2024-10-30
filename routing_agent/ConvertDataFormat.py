@@ -1,9 +1,6 @@
 import json
 import numpy as np
 import FindPath
-from routing_agent.WaypointGraph import WaypointGraph,Node
-from routing_agent.Vector import Vector3
-from routing_agent.Node import Node,convertToNodeId
 
 
 def loadJSONFile(file_path):
@@ -158,37 +155,12 @@ def convertFromFileToROSServiceFormat(waypoint_graph_file_location,orders_file_l
     return waypoint_graph_locations,waypoint_graph_edges,waypoint_graph_offsets,task_locations,vehicle_start_location
 
 
-def mergeWaypointGraph(allmaps)->WaypointGraph:
-    meredGraph=WaypointGraph()
-    for mapid,value in allmaps.items():
-        #shift
-        map=value["file_data"]
-        graph=map["graph"]
-        for nodeindex,nodeValue in graph.items():
-            nodeid=convertToNodeId(mapid,int(nodeindex))
-            newNode=Node()
-            meredGraph.append(newNode)
-            
-
-
-    
-    # shift map_1:[0,50]
-    mapDict={"map_1":[1,23]}
-    
-    # 
-
-    return 
-
 
 def isWithInRange(index,mapRange)->bool:
     if index>=mapRange[0] and index<=mapRange[1]:
         return True
     else:
         return False
-
-def splitWaypointGraph():
-    isWithInRange(3,[1,2])
-    return
     
 
 def getPathToNextTask(currentNodeId,remainingPathData,remainingTasksData):
@@ -205,28 +177,11 @@ def getPathToNextTask(currentNodeId,remainingPathData,remainingTasksData):
         return 
 
 
-def convertMatrixToCSR():
+def convertMatrixToCSR(matrix):
     valueList=[]
     offsets=[]
-
-    
+    for row in matrix:
+        offsets.append(len(valueList))
+        valueList=valueList+row
 
     return valueList,offsets
-
-def convertJSONnodeToNode(id,nodedata):
-    location=Vector3(nodedata["locallocation"][0],nodedata["locallocation"][1],nodedata["locallocation"][2])
-    return Node(id,location,nodedata["map_id"],nodedata["edges"])
-
-def loadWaypointGraphData(waypointgraphdata)->WaypointGraph:
-    idlist=[]
-    nodeList=[]
-    for nodeid,value in waypointgraphdata.item():
-        idlist.append(nodeid)
-        nodeList.append(convertJSONnodeToNode(nodeid,value))
-
-    return WaypointGraph(idlist,nodeList)
-
-def getMapIdByNodeId(nodeid):
-    mapid,_=nodeid.split("_")
-    return mapid
-
