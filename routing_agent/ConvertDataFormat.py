@@ -1,6 +1,9 @@
 import json
 import numpy as np
 import FindPath
+from routing_agent.WaypointGraph import WaypointGraph,Node
+from routing_agent.Vector import Vector3
+from routing_agent.Node import Node,convertToNodeId
 
 
 def loadJSONFile(file_path):
@@ -16,7 +19,6 @@ def loadJSONIntoStr(file_path):
 
 def convertGraphFileToCSR(graphfile):
     num_nodes = len(graphfile["graph"])
-
     offsets = []
     edges = []
 
@@ -29,11 +31,6 @@ def convertGraphFileToCSR(graphfile):
     offsets.append(cur_offset)
     return  np.array(edges),np.array(offsets),
 
-
-
-
-def calculateDistance(location1,location2):
-    return((location1[0]-location2[0])**2+(location1[1]-location2[1])**2+(location1[2]-location2[2])**2)**0.5
 
 def calculateGraphWeightByFile(graphfile):
     weights=[]
@@ -161,12 +158,25 @@ def convertFromFileToROSServiceFormat(waypoint_graph_file_location,orders_file_l
     return waypoint_graph_locations,waypoint_graph_edges,waypoint_graph_offsets,task_locations,vehicle_start_location
 
 
-def mergeWaypointGraph(waypointGraphConfigs):
-    
+def mergeWaypointGraph(allmaps)->WaypointGraph:
+    meredGraph=WaypointGraph()
+    for mapid,value in allmaps.items():
+        #shift
+        map=value["file_data"]
+        graph=map["graph"]
+        for nodeindex,nodeValue in graph.items():
+            nodeid=convertToNodeId(mapid,int(nodeindex))
+            newNode=Node()
+            meredGraph.append(newNode)
+            
+
+
     
     # shift map_1:[0,50]
     mapDict={"map_1":[1,23]}
     
+    # 
+
     return 
 
 
@@ -180,3 +190,43 @@ def splitWaypointGraph():
     isWithInRange(3,[1,2])
     return
     
+
+def getPathToNextTask(currentNodeId,remainingPathData,remainingTasksData):
+    pathToNextTask={"node_sequence":[],"graph":{}}
+    startIndex=remainingPathData["node_sequence"].index(currentNodeId)
+    if(len(remainingTasksData["task_sequence"])==1):
+        #lastTask
+        pathToNextTask["node_sequence"]=remainingPathData["node_sequence"][startIndex+1::]
+    else:
+        nextTaskNodeId=remainingTasksData["task_sequence"][0]
+        endIndex=remainingPathData["node_sequence"].index(nextTaskNodeId)
+        pathToNextTask["node_sequence"]=remainingPathData["node_sequence"][startIndex+1:endIndex+1]
+    for id in pathToNextTask["node_sequence"]:
+        return 
+
+
+def convertMatrixToCSR():
+    valueList=[]
+    offsets=[]
+
+    
+
+    return valueList,offsets
+
+def convertJSONnodeToNode(id,nodedata):
+    location=Vector3(nodedata["locallocation"][0],nodedata["locallocation"][1],nodedata["locallocation"][2])
+    return Node(id,location,nodedata["map_id"],nodedata["edges"])
+
+def loadWaypointGraphData(waypointgraphdata)->WaypointGraph:
+    idlist=[]
+    nodeList=[]
+    for nodeid,value in waypointgraphdata.item():
+        idlist.append(nodeid)
+        nodeList.append(convertJSONnodeToNode(nodeid,value))
+
+    return WaypointGraph(idlist,nodeList)
+
+def getMapIdByNodeId(nodeid):
+    mapid,_=nodeid.split("_")
+    return mapid
+

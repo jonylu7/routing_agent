@@ -4,11 +4,15 @@ from rclpy.node import Node
 import routing_agent.RoutingAgent as RoutingAgent
 import json
 import ConvertDataFormat
+from routing_agent.WaypointGraph import WaypointGraph
 
 
 class RoutingServer(Node):
-    waypointGraphData=""
-    hasLoadedWaypointGraph=False
+    isWaypointGraphLoaded=False
+    
+    unfinishedOrderData=json.loads("{}")
+    currentVehicleData=json.loads("{}")
+    unfinishedPath=json.loads("{}")
 
     def __init__(self):
         super().__init__('routing_service')
@@ -21,23 +25,38 @@ class RoutingServer(Node):
     def MergeWaypointGraphServiceCallBack(self,request,response):
         mapsConfigData=json.loads(request.maps_config_data)
         response.can_merge,response.global_waypoint_graph_file_data=ConvertDataFormat.mergeWaypointGraph(mapsConfigData)
-        #stores at 
-        #self.response.global_waypoint_graph_file_location
+        if(response.can_merge):
+            self.waypointGraphData=response.global_waypoint_graph_file_data
+            self.isWaypointGraphLoaded=True
         return response
     
     def LoadWaypointGraphServiceCallBack(self,request,response):
         #load 
-        
+        self.waypointGraphData=request.waypoint_graph_data
+        response.can_load=True
+        self.isWaypointGraphLoaded=True
         return response
     
     def RoutingServiceCallBack(self, request, response):
-
+        if(self.isWaypointGraphLoaded):
+            orderData=json.loads(request.order_node_data)
+            vehicleData=json.loads(request.vehicle_initial_data)
+            response.response_data=RoutingAgent.runRoutingAgent(self.waypointGraphData,orderData,vehicleData)
+            self.unfinishedOrderData=orderData
+            self.currentVehicleData=vehicleData
+            self.unfinishedPath=response.response_data
+        else:
+            #change it to log... something
+            print("Please Load WaypointGraph First, use command loadGraph <waypoint_graph_file_location>")
         return response
     def NavServiceCallBack(self,request,response):
-        #send "sucess" current map id local locations/ 
-        # "failed" current map id local locations 
-        # set occupied map and reroute again
-        # path to next task locations
+        if(request.can_arrive):
+            response.path_to_next_task=
+        #request.can_arrive true
+        #request.can_go_to false 
+        #1. solve TSP
+        #2. reroute
+
         return response
 
         
