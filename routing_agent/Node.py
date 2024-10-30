@@ -1,6 +1,5 @@
 from Vector import Vector3
 class Node:
-    shift=Vector3(0,0,0)
     def __init__(self,id:str="DEFAULT_NODE",locallocation:Vector3=Vector3(),mapid:str="DEFAULT_MAP",edges:list=[],isentrypoint:bool=False,entrytonodeid:str="DEFAULT_ENTRY_TO_NODE"):
         self.id=id
         self.edges=edges
@@ -9,18 +8,19 @@ class Node:
         self.isEntryPoint=isentrypoint
         self.entryToNodeId=entrytonodeid
     
-    def setLocalToGlobalShift(self,shift):
-        self.shift=shift
-
-    def getGlobalLocation(self)->Vector3:
-        return self.localLocation+self.shift
     def setEntryPointById(self,nodeid:str):
         self.isEntryPoint=True
         self.entryToNodeId
 
 
-def convertToNodeId(mapid,nodeindex)->str:
-    return 
+def convertToNodeId(mapid:any,nodeindex:any)->str:
+    mapname,mapindex=mapid.split("_")
+    if(type(nodeindex)==str):
+        nodeindex=int(nodeindex)
+    if(type(mapindex)==str):
+        mapindex=int(mapindex)
+    nodeId="{:03}".format(mapindex)+"_"+"{:03}".format(nodeindex)
+    return nodeId
 
 def getMapIdByNodeId(nodeid):
     mapid,_=nodeid.split("_")
