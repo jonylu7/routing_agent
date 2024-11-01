@@ -4,6 +4,7 @@ import rclpy
 from rclpy.node import Node
 import ConvertDataFormat
 import json
+from pathlib import Path
 
 
 class MergeWaypointGraphClient(Node):
@@ -22,12 +23,12 @@ class MergeWaypointGraphClient(Node):
         self.future = self.cli.call_async(self.req)
 
     def loadMapsConfig(self,filepath):
-        configData=ConvertDataFormat.loadJSONIntoStr(filepath)
+        filepath = Path(filepath)
+        configData=ConvertDataFormat.loadJSONFile(filepath)
         for mapid in configData.keys():
-            mapPath=configData[mapid]["file_path"]
-            mapData=ConvertDataFormat.loadJSONIntoStr(mapPath)
+            mapPath=filepath.parent+configData[mapid]["file_path"]
+            mapData=ConvertDataFormat.loadJSONFile(mapPath)
             configData[mapid]["file_data"]=mapData
-
         return configData
 
 

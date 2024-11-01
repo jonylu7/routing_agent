@@ -13,7 +13,6 @@ def loadJSONIntoStr(file_path):
     data=json.dumps(data)
     return data
 
-
 def convertGraphFileToCSR(graphfile):
     num_nodes = len(graphfile["graph"])
     offsets = []
