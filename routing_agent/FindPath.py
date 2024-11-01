@@ -1,4 +1,5 @@
 import numpy as np
+from typing import Tuple
 
 def initDist(graph):
     dist = {}
@@ -73,7 +74,7 @@ def initPathMatrix(matrixsize):
     return pathmatrix
 
 
-def findAllShortestPath(graph):
+def findAllShortestPath(graph)->Tuple[np.array,list[list[str]]]:
     costmatrix=[]
     pathmatrix=initPathMatrix(len(graph))
     for start in graph:

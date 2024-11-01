@@ -1,10 +1,12 @@
 from Vector import Vector3
-from Node import Node,convertToNodeId,convertJSONnodeToNode
+from Node import Node,convertToNodeId,convertJSONnodeToNode,calculateDistanceBetweenNodes
 import ConvertDataFormat
 from ConvertDataFormat import loadJSONFile
+from pathlib import Path
+import FindPath
 class WaypointGraph:
     graph={}
-    def __init__(self,nodeid:list=[],nodes:list=[]):
+    def __init__(self,nodeid:list[str]=[],nodes:list[Node]=[]):
         #load files and convert it into 
         for index,id in enumerate(nodeid):
             self.addNode(id,nodes[index])
@@ -15,14 +17,8 @@ class WaypointGraph:
     def getNodeById(self,id)->Node:
         return self.graph[id]
 
-    def calculateDistanceMatrix(self):
-        return
-
     def addNode(self,node):
         self.graph[node.id]=node
-
-    def findPath(self,source,destination):
-        return
 
     def setEntryPoints(self,fromId,toId):
         fromNode=self.getNodeById(fromId)
@@ -31,6 +27,34 @@ class WaypointGraph:
             fromNode.setEntryPointById(toId)
         if(toNode.entryToNodeId!=fromId):
             toNode.setEntryPointById(fromId)
+
+    
+    def convertToDistanceMatrix(self):
+        nodeIdIndex,offsets,edges,weights=self.__convertToCSR()
+        graph=FindPath.convertFromCSRToDijGraph(offsets,edges,weights)
+        costmatrix,pathmatrix=FindPath.findAllShortestPath(graph)
+        return nodeIdIndex,costmatrix
+
+    def __calculateDistanceOfEdges(self,nodeIdIndex,fromNode,edges):
+        weights=[float('inf')]*len(edges)
+        for toNode in edges:
+            insertAt=nodeIdIndex.index(toNode)
+            weights[insertAt]=calculateDistanceBetweenNodes(fromNode,toNode)
+        #connect entrypoints
+        if fromNode.isEntryPoint:
+            weights[nodeIdIndex.index(fromNode.entryToNodeId)]=0
+        return weights
+
+    def __convertToCSR(self):
+        nodeIdIndex=list(self.graph.keys())
+        offsets=[]
+        edges=[]
+        weights=[]
+        for _,thisNode in self.graph.items():
+            offsets.append(len(edges))
+            edges.append(thisNode.edges)
+            weights+=self.__calculateDistanceOfEdges(nodeIdIndex,thisNode,self.edges)
+        return nodeIdIndex,offsets,edges,weights
     
 
 def mergeWaypointGraph(allmaps)->WaypointGraph:
@@ -89,10 +113,11 @@ def testLoadMap():
     print(convertWaypointGraphToJSON(graph))
 
 def testMergeMaps():
-    filepath="routing_agent/preprocess_maps/maps.config.json"
+    filepath = Path("routing_agent/preprocess_maps/maps.config.json")
+
     configData=ConvertDataFormat.loadJSONFile(filepath)
     for mapid in configData.keys():
-        mapPath="routing_agent/preprocess_maps/"+configData[mapid]["file_path"]
+        mapPath=filepath.parent+configData[mapid]["file_path"]
         mapData=ConvertDataFormat.loadJSONFile(mapPath)
         configData[mapid]["file_data"]=mapData
     print(configData)

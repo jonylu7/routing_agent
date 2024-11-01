@@ -50,8 +50,8 @@ class RoutingServer(Node):
             print("Please Load WaypointGraph First, use command loadGraph <waypoint_graph_file_location>")
         return response
     def NavServiceCallBack(self,request,response):
-        if(request.can_arrive):
-            response.path_to_next_task=
+        #if(request.can_arrive):
+            #response.path_to_next_task=
         #request.can_arrive true
         #request.can_go_to false 
         #1. solve TSP

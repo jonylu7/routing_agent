@@ -1,4 +1,4 @@
-from Vector import Vector3
+from Vector import Vector3,calculateDistance
 class Node:
     def __init__(self,id:str="DEFAULT_NODE",locallocation:Vector3=Vector3(),mapid:str="DEFAULT_MAP",edges:list=[],isentrypoint:bool=False,entrytonodeid:str="DEFAULT_ENTRY_TO_NODE"):
         self.id=id
@@ -33,3 +33,6 @@ def convertJSONnodeToNode(id,nodedata):
     location=Vector3(x,y,z)
     mapId=getMapIdByNodeId(id)
     return Node(id,location,mapId,nodedata["edges"])
+
+def calculateDistanceBetweenNodes(node1,node2):
+    return calculateDistance(node1.localLocation,node2.localLocation)
