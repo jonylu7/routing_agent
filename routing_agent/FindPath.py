@@ -23,17 +23,13 @@ def dijkstra(graph, start):
 
     return shortestdist, path
 
-def saveAllAsJSON(start, destination, shortestPath, distance):
-    with open("result/"+filename+"_run_1.json","w") as new_file:
-        data = {"from": start, "to": destination, "path": shortestPath, "distance": distance}
-        json.dump(data, new_file)
-
-def getRouteToDest(dijpath, destination):
-    path = []
-    while destination in dijpath:
+def getPathToDest(dijpath, destination):
+    path = [destination]
+    target = dijpath[destination]
+    while target in dijpath:
         path.append(target)
         target = dijpath[target]
-    path.append(target)
+    
     path.reverse()
     return path
 
@@ -77,7 +73,8 @@ def initPathMatrix(matrixsize):
 def findAllShortestPath(graph)->Tuple[np.array,list[list[str]]]:
     costmatrix=[]
     pathmatrix=initPathMatrix(len(graph))
-    for start in graph:
+    
+    for start in range(len(graph)):
         ## traverse every node in graph and get every shortestpath from every node
         shortestdist, dijpath=dijkstra(graph,start)
         row=convertFromShortestDistToNpArray(shortestdist)
@@ -121,12 +118,12 @@ def convertFromCSRToDijGraph(offsets,edges,weights):
 
             if (targetnode not in graph):
                 graph[targetnode] = {}
-            if (weight == "inf"):
+            if (weight == float("inf")):
                 continue
             elif (weight < 0):
-                graph[targetnode][startnode] = abs(int(weight))
+                graph[targetnode][startnode] = abs(float(weight))
             else:
-                graph[startnode][targetnode] = int(weight)
+                graph[startnode][targetnode] = float(weight)
     return graph
 
 

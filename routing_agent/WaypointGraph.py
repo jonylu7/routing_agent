@@ -30,19 +30,25 @@ class WaypointGraph:
 
     
     def convertToDistanceMatrix(self):
-        nodeIdIndex,offsets,edges,weights=self.__convertToCSR()
-        graph=FindPath.convertFromCSRToDijGraph(offsets,edges,weights)
+        nodeIdIndex,graph=self.convertToDijGraph()
+        #print(graph)
         costmatrix,pathmatrix=FindPath.findAllShortestPath(graph)
+        #print(pathmatrix)
         return nodeIdIndex,costmatrix
 
-    def __calculateDistanceOfEdges(self,nodeIdIndex,fromNode,edges):
-        weights=[float('inf')]*len(edges)
-        for toNode in edges:
-            insertAt=nodeIdIndex.index(toNode)
-            weights[insertAt]=calculateDistanceBetweenNodes(fromNode,toNode)
-        #connect entrypoints
-        if fromNode.isEntryPoint:
-            weights[nodeIdIndex.index(fromNode.entryToNodeId)]=0
+    def convertToDijGraph(self):
+        nodeIdIndex,offsets,edges,weights=self.__convertToCSR()
+        dijGraph=self.__convertFromCSRToDijGraph(nodeIdIndex,offsets,edges,weights)
+        return nodeIdIndex,dijGraph
+
+
+    def __calculateDistanceOfEdges(self,fromnode):
+        edges=fromnode.edges
+        weights=[]
+        for toNodeid in edges:
+            toNode=self.getNodeById(toNodeid)
+            weights.append(calculateDistanceBetweenNodes(fromnode,toNode))
+        
         return weights
 
     def __convertToCSR(self):
@@ -52,9 +58,58 @@ class WaypointGraph:
         weights=[]
         for _,thisNode in self.graph.items():
             offsets.append(len(edges))
-            edges.append(thisNode.edges)
-            weights+=self.__calculateDistanceOfEdges(nodeIdIndex,thisNode,self.edges)
+            edges+=thisNode.edges
+            weights+=self.__calculateDistanceOfEdges(thisNode)
+            #connect entry points
+            if thisNode.isEntryPoint:
+                edges.append(thisNode.entryToNodeId)
+                weights.append(0)
         return nodeIdIndex,offsets,edges,weights
+
+    def __convertFromCSRToDijGraph(self,nodeIdIndex,offsets,edges,weights):
+        graph = {}
+        for offsetindex in range(len(offsets)-1):
+            startnode=offsetindex
+            targetsAtThisIndex,weightsAtThisIndex=self.__getTargetsAndWeightsByIndex(offsetindex,offsets,edges,weights)
+
+            if (startnode not in graph):
+                graph[startnode] = {}
+            for i in range(len(targetsAtThisIndex)):
+
+                targetnode=nodeIdIndex.index(targetsAtThisIndex[i])
+                weight=weightsAtThisIndex[i]
+
+                if (targetnode not in graph):
+                    graph[targetnode] = {}
+
+                if (weight == float("inf")):
+                    continue
+                elif (weight < 0):
+                    weight = abs(float(weight))
+                
+                graph[startnode][targetnode] = float(weight)
+
+                # connect both ways of nodes
+                if not(startnode in graph[targetnode]):
+                    graph[targetnode][startnode] = float(weight)
+                elif(graph[targetnode][startnode]>weight):
+                         graph[targetnode][startnode] = float(weight)
+        return graph
+    
+    def __getTargetsAndWeightsByIndex(self,offsetindex,offsets,edges,weights):
+        valueindexto=self.__calculateOffsetRange(offsetindex, offsets)
+        valueindexfrom=offsets[offsetindex]
+        targets=edges[valueindexfrom:valueindexto]
+        weights=weights[valueindexfrom:valueindexto]
+        return targets,weights
+
+    def __calculateOffsetRange(self,offsetindex,offsets):
+        offsetrange=0
+        if(offsetindex==len(offsets)-1):
+            offsetrange=len(offsets)
+        else:
+            offsetrange=offsets[offsetindex+1]
+        return offsetrange
     
 
 def mergeWaypointGraph(allmaps)->WaypointGraph:
@@ -110,19 +165,22 @@ def loadWaypointGraphData(waypointgraphdata)->WaypointGraph:
 def testLoadMap():
     data=loadJSONFile("/home/csl/ros2_ws/src/routing_agent/routing_agent/waypoint_graph_global.json")
     graph=loadWaypointGraphData(data)
-    print(convertWaypointGraphToJSON(graph))
+    #print(convertWaypointGraphToJSON(graph))
 
 def testMergeMaps():
     filepath = Path("routing_agent/preprocess_maps/maps.config.json")
 
     configData=ConvertDataFormat.loadJSONFile(filepath)
     for mapid in configData.keys():
-        mapPath=filepath.parent+configData[mapid]["file_path"]
+        mapPath=str(filepath.parent)+"/"+configData[mapid]["file_path"]
         mapData=ConvertDataFormat.loadJSONFile(mapPath)
         configData[mapid]["file_data"]=mapData
-    print(configData)
+    #print(configData)
     graph=mergeWaypointGraph(configData)
-    print(convertWaypointGraphToJSON(graph))
+    return graph
+    #print(convertWaypointGraphToJSON(graph))
+    #print(graph.convertToDistanceMatrix())
+    
 
 
 if __name__=="__main__":

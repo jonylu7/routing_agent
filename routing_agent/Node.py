@@ -10,7 +10,7 @@ class Node:
     
     def setEntryPointById(self,nodeid:str):
         self.isEntryPoint=True
-        self.entryToNodeId
+        self.entryToNodeId=nodeid
 
 
 def convertToNodeId(mapid:any,nodeindex:any)->str:
@@ -34,5 +34,5 @@ def convertJSONnodeToNode(id,nodedata):
     mapId=getMapIdByNodeId(id)
     return Node(id,location,mapId,nodedata["edges"])
 
-def calculateDistanceBetweenNodes(node1,node2):
+def calculateDistanceBetweenNodes(node1:Node,node2:Node):
     return calculateDistance(node1.localLocation,node2.localLocation)
