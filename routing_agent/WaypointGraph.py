@@ -40,6 +40,16 @@ class WaypointGraph:
         nodeIdIndex,offsets,edges,weights=self.__convertToCSR()
         dijGraph=self.__convertFromCSRToDijGraph(nodeIdIndex,offsets,edges,weights)
         return nodeIdIndex,dijGraph
+    
+
+    def convertToJSON(self):
+        jsondata={}
+        for nodeid,node in self.graph.items():
+            jsondata[nodeid]={
+                "edges":node.edges,
+                "local_locations":node.localLocation.toList()
+            }
+        return jsondata
 
 
     def __calculateDistanceOfEdges(self,fromnode):
@@ -139,16 +149,6 @@ def mergeWaypointGraph(allmaps)->WaypointGraph:
             toNodeId=convertToNodeId(value["map_id"],value["node_index"])
             meredGraph.setEntryPoints(fromNodeId,toNodeId)
     return meredGraph
-
-
-def convertWaypointGraphToJSON(graph:WaypointGraph):
-    jsondata={}
-    for nodeid,node in graph.graph.items():
-        jsondata[nodeid]={
-            "edges":node.edges,
-            "local_locations":node.localLocation.toList()
-        }
-    return jsondata
 
 def loadWaypointGraphData(waypointgraphdata)->WaypointGraph:
     idlist=[]

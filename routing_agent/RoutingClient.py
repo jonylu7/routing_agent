@@ -23,8 +23,8 @@ class RoutingClient(Node):
         self.future = self.cli.call_async(self.req)
 
     def readFiles(self,orders_file_location,vehicle_data_location):
-        orderData=ConvertDataFormat.loadJSONIntoStr(orders_file_location)
-        vehicleData=ConvertDataFormat.loadJSONIntoStr(vehicle_data_location)
+        orderData=ConvertDataFormat.loadJSONToStr(orders_file_location)
+        vehicleData=ConvertDataFormat.loadJSONToStr(vehicle_data_location)
         return orderData,vehicleData
 
 

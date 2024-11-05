@@ -8,10 +8,16 @@ def loadJSONFile(file_path):
         data = json.load(file)
     return data
 
-def loadJSONIntoStr(file_path):
+def loadJSONToStr(file_path):
     data=loadJSONFile(file_path)
     data=json.dumps(data)
     return data
+
+def convertJSONToStr(jsondata:dict):
+    return json.dumps(jsondata)
+
+def convertStrToJSON(str:str)->dict:
+    return json.loads(str)
 
 def convertGraphFileToCSR(graphfile):
     num_nodes = len(graphfile["graph"])

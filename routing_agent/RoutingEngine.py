@@ -1,29 +1,20 @@
 import WaypointGraph
 import elkai
 import numpy as np
-import Node
+from Node import Node
 import FindPath
 from ConvertDataFormat import loadJSONFile
-class Task:
-    def __init__(self,locationnode,demand=1):
-        self.locationNode=locationnode
-        self.demand=demand
-
-class Vehicle:
-    def __init__(self,locationnode,capcity=1):
-        self.locationNode=locationnode
-        self.capacity=capcity
-
+from Task import Task,loadTasksData
+from Vehicle import Vehicle,loadVehiclesData
 
 def convertNodeListToNodeIndex(nodeList:list,nodeIndex):
     newList=[]
     for node in nodeList:
         if(type(node)==Vehicle or type(node)==Task):
             newList.append(nodeIndex.index(node.locationNode.id))
-        elif(type(node)==Node.Node):
+        elif(type(node)==Node):
              newList.append(nodeIndex.index(node.id))
     return newList
-
 
 def findIdInNodeList(nodeList:list,nodeId):
     found=-1
@@ -31,45 +22,20 @@ def findIdInNodeList(nodeList:list,nodeId):
         if(type(node)==Vehicle or type(node)==Task):
             if(node.locationNode.id==nodeId):
                 found=index
-        elif(type(node)==Node.Node):
+        elif(type(node)==Node):
              if(node.id==nodeId):
                  found=index
     return found
 
 
-def loadVehiclesData(waypointGraph:WaypointGraph,vehicledata):
-    vehicleSize=len(vehicledata["vehicle_locations"])
-    fleet=[]
-    for i in range(vehicleSize):
-        node=waypointGraph.getNodeById(vehicledata["vehicle_locations"][i])
-        capacity=vehicledata["vehicle_locations"][i]
-        fleet.append(Vehicle(node,capacity))
-    return fleet
-
-
-
-def loadTasksData(waypointGraph:WaypointGraph,taskdata):
-    vehicleSize=len(taskdata["task_sequence"])
-    tasks=[]
-    for i in range(vehicleSize):
-        try:
-            node=waypointGraph.getNodeById(taskdata["task_sequence"][i])
-        except:
-            raise KeyError("Failed to load task data, can't match task node with waypointgraph")
-        demand=taskdata["task_sequence"][i]
-        tasks.append(Vehicle(node,demand))
-    return tasks
-
-
-
-
 class RoutingEngine:
     occupiedEdgeMatrix:np.array
+    taskSequence:list=[]
     latestSolutionPath:list=[]
     routeAtNextUpdate=False
     def __init__(self,waypointgraph:WaypointGraph,tasklist:list,initfleet:list[Vehicle]):
         self.nodeIndex,self.distanceMatrix=waypointgraph.convertToDistanceMatrix()
-
+        self.waypointGraph=waypointgraph
         _,self.ogDijGraph=waypointgraph.convertToDijGraph()
         self.occupiedDijGraph=self.ogDijGraph
 
@@ -100,10 +66,14 @@ class RoutingEngine:
         for index in costMatrixSol:
             solutionId.append(self.nodeIndex[index])
         self.routeAtNextUpdate=True
+        self.taskSequence=solutionId
         return solutionId
     
 
     def findPathBetweenTwoPoints(self,fromnodeid,tonodeid):
+        if(fromnodeid==tonodeid):
+            return [],0
+        print(self.occupiedDijGraph)
         fromIndex=self.nodeIndex.index(fromnodeid)
         toIndex=self.nodeIndex.index(tonodeid)
         distance,dijpathToAll=FindPath.dijkstra(self.occupiedDijGraph,fromIndex)
@@ -114,6 +84,7 @@ class RoutingEngine:
         for p in path:
            idPath.append(self.nodeIndex[p])
            distanceEstimate.append(distance[p])
+        print(idPath)
         return idPath,distanceEstimate
 
     def __prunCostMatrix(self,costMatrix,orders):
@@ -135,16 +106,17 @@ class RoutingEngine:
     def update(self,currentnodeid):
         # route
         if(self.routeAtNextUpdate or len(self.latestSolutionPath)==1):
-            found=findIdInNodeList(self.taskList,currentnodeid)
+            found=self.taskSequence.index(currentnodeid)
             if(found!=-1):
-                self.taskList.pop(found)
-            if(len(self.taskList)>1):
-                nextTaskId=self.taskList[1].locationNode.id
-            elif(len(self.taskList)==1):
-               nextTaskId=self.taskList[0].locationNode.id
-            elif(len(self.taskList)==0):
+                self.taskSequence.pop(found)
+
+            if(len(self.taskSequence)==0):
+                self.latestSolutionPath=[]
                 print("Finished All Tasks")
                 return []
+            
+            nextTaskId=self.taskSequence[0]
+            
             idPath,distanceEstimates=self.findPathBetweenTwoPoints(currentnodeid,nextTaskId)
             self.latestSolutionPath=idPath
             self.routeAtNextUpdate=False
@@ -157,8 +129,15 @@ class RoutingEngine:
     def response(self):
         #for 
         jsondata={}
-
-
+        nodeSequence=[]
+        graph={}
+        for nodeid in self.latestSolutionPath:
+            nodeSequence.append(nodeid)
+            graph[nodeid]={"local_location":self.waypointGraph.getNodeById(nodeid).localLocation.toList(),"action":"None"}
+        jsondata["node_sequence:"]=nodeSequence
+        jsondata["graph"]=graph
+        return jsondata
+            
 
     def setOccupiedEdge(self,occupiedEdge:list[str]):
         self.__setDijGraphValue(occupiedEdge,float("inf"))
@@ -197,13 +176,16 @@ def testRoutingEngine():
     tasks=loadTasksData(graph,taskdata)
     re=RoutingEngine(graph,tasks,vehicles)
     re.solve()
-    re.update("000_000")
-    re.update("000_002")
-    re.update("001_000")
-    re.update("001_001")
-    re.update("001_002")
-    re.update("002_000")
-    re.update("002_001")
+    print(re.update("000_000"))
+    print(re.update("000_002"))
+    print(re.update("001_000"))
+    print(re.update("001_001"))
+    print(re.update("001_002"))
+    print(re.update("002_000"))
+    print(re.update("002_001"))
+    print(re.update("002_002"))
+    print(re.update("000_003"))
+    print(re.update("000_000"))
 
 
 if __name__=="__main__":

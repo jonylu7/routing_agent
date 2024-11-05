@@ -18,7 +18,7 @@ class LoadWaypointGraphClient(Node):
                                            # CHANG
 
     def send_request(self):
-        self.req.waypoint_graph_data=ConvertDataFormat.loadJSONIntoStr(sys.argv[1])
+        self.req.waypoint_graph_data=ConvertDataFormat.loadJSONToStr(sys.argv[1])
         self.future = self.cli.call_async(self.req)
         
 
