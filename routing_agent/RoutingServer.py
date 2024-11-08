@@ -3,7 +3,7 @@ import rclpy
 from rclpy.node import Node
 import routing_agent.RoutingAgent as RoutingAgent
 import json
-from ConvertDataFormat import convertJSONToStr,convertStrToJSON
+from ConvertDataFormat import convertJSONToStr,convertStrToJSON,saveJSONAt
 from WaypointGraph import WaypointGraph,mergeWaypointGraph,loadWaypointGraphData
 from RoutingEngine import RoutingEngine
 from Task import loadTasksData
@@ -24,9 +24,12 @@ class RoutingServer(Node):
 
     def MergeWaypointGraphServiceCallBack(self,request,response):
         mapsConfigData=json.loads(request.maps_config_data)
+        mapSaveLocation=mapsConfigData["merged_file_location"]
         try:
             self.waypointGraph=mergeWaypointGraph(mapsConfigData)
             response.global_waypoint_graph_file_data=convertJSONToStr(self.waypointGraph.convertToJSON())
+            saveJSONAt(self.waypointGraph.convertToJSON(),mapSaveLocation)
+            response.global_waypoint_graph_file_location=mapSaveLocation
             response.can_merge=True
         except:
             response.can_merge=False
@@ -37,8 +40,9 @@ class RoutingServer(Node):
     
     def LoadWaypointGraphServiceCallBack(self,request,response):
         #load 
+        print(request.waypoint_graph_data)
         try:
-            self.waypointGraph=loadWaypointGraphData(request.waypoint_graph_data)
+            self.waypointGraph=loadWaypointGraphData(convertStrToJSON(request.waypoint_graph_data))
             response.can_load=True
         except:
             response.can_load=False
@@ -48,29 +52,31 @@ class RoutingServer(Node):
     def RoutingServiceCallBack(self, request, response):
         if(self.isWaypointGraphLoaded):
             try:
-                tasks=loadTasksData(convertStrToJSON(request.order_node_data))
-                vehicles=loadVehiclesData(convertStrToJSON(request.vehicle_data))
-                self.routingEngine=RoutingEngine(self.waypointGraph,tasks,vehicles)
+                tasks=loadTasksData(self.waypointGraph,convertStrToJSON(request.task_data))
             except:
-                print("Failed to findpath")
-            response.response_data=self.routingEngine.taskSequence
+                raise KeyError("Failed to load tasks into routing Engine")
+            try:
+                vehicles=loadVehiclesData(self.waypointGraph,convertStrToJSON(request.vehicle_data))
+            except:
+                raise KeyError("Failed to load vehicles into routing Engnine")
+            try:
+                self.routingEngine=RoutingEngine(self.waypointGraph,tasks,vehicles)
+                response.response_data=str(self.routingEngine.taskSequence)
+            except:
+                raise KeyError("Failed to findpath")
 
         else:
             #change it to log... something
             print("Please Load WaypointGraph First, use command loadGraph <waypoint_graph_file_location>")
         return response
     def NavServiceCallBack(self,request,response):
-        try:
-            self.routingEngine.solve()
-        except:
-            print("Routing Engine faild to solve, please give another set of tasks and vehicle locations")
-
-        if(request.can_go_to):
-            self.routingEngine.update(request.I_am_at_nodeid)
+        if(request.can_arrive):
+            self.routingEngine.update(request.i_am_at)
             response.path_to_next_task=convertJSONToStr(self.routingEngine.response())
         else:
             #set occupied
-            self.routingEngine.update(request.I_am_at_nodeid)
+            self.routingEngine.update(request.i_am_at)
+            response.path_to_next_task="Failed"
 
 
         return response

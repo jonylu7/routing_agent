@@ -42,6 +42,7 @@ class RoutingEngine:
         self.occupiedEdgeMatrix=np.zeros(self.distanceMatrix.shape)
         self.taskList=tasklist
         self.fleet=initfleet
+        self.solve()
 
     def __solveTSP(self):
         goThoughNodes=self.taskList
@@ -106,9 +107,9 @@ class RoutingEngine:
     def update(self,currentnodeid):
         # route
         if(self.routeAtNextUpdate or len(self.latestSolutionPath)==1):
-            found=self.taskSequence.index(currentnodeid)
-            if(found!=-1):
-                self.taskSequence.pop(found)
+            print(self.taskSequence)
+            if(currentnodeid in self.taskSequence):
+                self.taskSequence.pop(self.taskSequence.index(currentnodeid))
 
             if(len(self.taskSequence)==0):
                 self.latestSolutionPath=[]
@@ -116,14 +117,14 @@ class RoutingEngine:
                 return []
             
             nextTaskId=self.taskSequence[0]
-            
             idPath,distanceEstimates=self.findPathBetweenTwoPoints(currentnodeid,nextTaskId)
             self.latestSolutionPath=idPath
             self.routeAtNextUpdate=False
 
         #update solutionpath
-        startindex=self.latestSolutionPath.index(currentnodeid)
-        self.latestSolutionPath=self.latestSolutionPath[startindex+1::]
+        if(currentnodeid in self.latestSolutionPath):
+            startindex=self.latestSolutionPath.index(currentnodeid)
+            self.latestSolutionPath=self.latestSolutionPath[startindex+1::]
         return self.latestSolutionPath
 
     def response(self):
@@ -169,16 +170,28 @@ class RoutingEngine:
             self.occupiedDijGraph[node2Index][node1Index]=float('inf')
 
 def testRoutingEngine():
-    graph=WaypointGraph.testMergeMaps()
+    graph=WaypointGraph.testLoadMap()
     vehdata=loadJSONFile("routing_agent/vehicle_data.json")
     vehicles=loadVehiclesData(graph,vehdata)
     taskdata=loadJSONFile("routing_agent/task_data.json")
     tasks=loadTasksData(graph,taskdata)
     re=RoutingEngine(graph,tasks,vehicles)
-    re.solve()
+    print("1")
+    print(re.update("000_000"))
+    print(re.response())
+    print(re.update("000_000"))
+    print(re.response())
+    print(re.update("000_000"))
+    print(re.response())
+    print(re.update("000_000"))
+    print(re.response())
+    print(re.update("000_000"))
+    print(re.update("000_000"))
     print(re.update("000_000"))
     print(re.update("000_002"))
+    print(re.response())
     print(re.update("001_000"))
+    print(re.response())
     print(re.update("001_001"))
     print(re.update("001_002"))
     print(re.update("002_000"))

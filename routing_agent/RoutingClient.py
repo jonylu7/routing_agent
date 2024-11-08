@@ -10,7 +10,7 @@ class RoutingClient(Node):
 
     def __init__(self):
         super().__init__('minimal_client_async')
-        self.cli = self.create_client(RoutingServiceMsg, 'RoutingAgent')       # CHANGE
+        self.cli = self.create_client(RoutingServiceMsg, 'RoutingService')       # CHANGE
         while not self.cli.wait_for_service(timeout_sec=1.0):
             self.get_logger().info('service not available, waiting again...')
         self.req = RoutingServiceMsg.Request()
@@ -19,12 +19,12 @@ class RoutingClient(Node):
     def send_request(self):
         orders_file_location=sys.argv[1]
         vehicle_data_location=sys.argv[2]
-        self.req.task_locations_data,self.req.vehicle_start_locations_data=self.readFiles(orders_file_location,vehicle_data_location)
+        self.req.task_data,self.req.vehicle_data=self.readFiles(orders_file_location,vehicle_data_location)
         self.future = self.cli.call_async(self.req)
 
     def readFiles(self,orders_file_location,vehicle_data_location):
-        orderData=ConvertDataFormat.loadJSONToStr(orders_file_location)
-        vehicleData=ConvertDataFormat.loadJSONToStr(vehicle_data_location)
+        orderData=ConvertDataFormat.loadJSONFileToStr(orders_file_location)
+        vehicleData=ConvertDataFormat.loadJSONFileToStr(vehicle_data_location)
         return orderData,vehicleData
 
 
@@ -42,9 +42,10 @@ def main(args=None):
                 routingClient.get_logger().info(
                     'Service call failed %r' % (e,))
             else:
-                response_file_data=json.loads(response.response_file_data)
+                print(response.response_data)
+                response_data=json.loads(response.response_data)
                 routingClient.get_logger().info(
-                    'Routes: '+str(response_file_data)+"\nRoutesWithLocations"
+                    'Routes: '+str(response_data)+"\nRoutesWithLocations"
                     )  # CHANGE
             break
 

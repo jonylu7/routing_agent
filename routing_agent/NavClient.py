@@ -10,15 +10,15 @@ class NavClient(Node):
 
     def __init__(self):
         super().__init__('NavClient')
-        self.cli = self.create_client(NavServiceMsg, 'NavClient')       # CHANGE
+        self.cli = self.create_client(NavServiceMsg, 'NavService')       # CHANGE
         while not self.cli.wait_for_service(timeout_sec=1.0):
             self.get_logger().info('service not available, waiting again...')
         self.req = NavServiceMsg.Request()
         
                                            # CHANG
     def send_request(self):
-        self.req.can_go_to=sys.argv[1]
-        self.req.I_am_at_nodeid=sys.argv[2]
+        self.req.can_arrive=sys.argv[1]
+        self.req.i_am_at=sys.argv[2]
         self.future = self.cli.call_async(self.req)
         
 

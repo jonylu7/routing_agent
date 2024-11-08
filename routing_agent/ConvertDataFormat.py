@@ -8,7 +8,7 @@ def loadJSONFile(file_path):
         data = json.load(file)
     return data
 
-def loadJSONToStr(file_path):
+def loadJSONFileToStr(file_path):
     data=loadJSONFile(file_path)
     data=json.dumps(data)
     return data
@@ -18,6 +18,14 @@ def convertJSONToStr(jsondata:dict):
 
 def convertStrToJSON(str:str)->dict:
     return json.loads(str)
+
+def saveJSONAt(jsondata:dict,path:str):
+    try:
+        with open(path, "w+") as f:
+            json.dump(jsondata, f)
+    except:
+        raise KeyError("Failed to save file")
+
 
 def convertGraphFileToCSR(graphfile):
     num_nodes = len(graphfile["graph"])
@@ -31,7 +39,7 @@ def convertGraphFileToCSR(graphfile):
         edges = edges + graphfile["graph"][str(node)]["edges"]
 
     offsets.append(cur_offset)
-    return  np.array(edges),np.array(offsets),
+    return  np.array(edges),np.array(offsets)
 
 
 def calculateGraphWeightByFile(graphfile):

@@ -1,7 +1,7 @@
 from Vector import Vector3
 from Node import Node,convertToNodeId,convertJSONnodeToNode,calculateDistanceBetweenNodes
 import ConvertDataFormat
-from ConvertDataFormat import loadJSONFile
+from ConvertDataFormat import loadJSONFile,saveJSONAt
 from pathlib import Path
 import FindPath
 class WaypointGraph:
@@ -9,7 +9,7 @@ class WaypointGraph:
     def __init__(self,nodeid:list[str]=[],nodes:list[Node]=[]):
         #load files and convert it into 
         for index,id in enumerate(nodeid):
-            self.addNode(id,nodes[index])
+            self.addNode(nodes[index])
 
     def getNodeLocalLocationById(self,id):
         return self.graph[id].localLocation
@@ -47,8 +47,10 @@ class WaypointGraph:
         for nodeid,node in self.graph.items():
             jsondata[nodeid]={
                 "edges":node.edges,
-                "local_locations":node.localLocation.toList()
+                "local_location":node.localLocation.toList()
             }
+            if(node.isEntryPoint):
+                jsondata[nodeid]["edges"].append(node.entryToNodeId)
         return jsondata
 
 
@@ -122,7 +124,8 @@ class WaypointGraph:
         return offsetrange
     
 
-def mergeWaypointGraph(allmaps)->WaypointGraph:
+def mergeWaypointGraph(value)->WaypointGraph:
+    allmaps=value["merged_file_data"]
     meredGraph=WaypointGraph()
     for mapid,value in allmaps.items():
         map=value["file_data"]
@@ -150,7 +153,7 @@ def mergeWaypointGraph(allmaps)->WaypointGraph:
             meredGraph.setEntryPoints(fromNodeId,toNodeId)
     return meredGraph
 
-def loadWaypointGraphData(waypointgraphdata)->WaypointGraph:
+def loadWaypointGraphData(waypointgraphdata:dict)->WaypointGraph:
     idlist=[]
     nodeList=[]
     for nodeid,value in waypointgraphdata.items():
@@ -163,9 +166,10 @@ def loadWaypointGraphData(waypointgraphdata)->WaypointGraph:
 
 
 def testLoadMap():
-    data=loadJSONFile("/home/csl/ros2_ws/src/routing_agent/routing_agent/waypoint_graph_global.json")
+    data=loadJSONFile("/home/csl/ros2_ws/test_run/preprocess_maps/MergedWaypointGraph.json")
     graph=loadWaypointGraphData(data)
     #print(convertWaypointGraphToJSON(graph))
+    return graph
 
 def testMergeMaps():
     filepath = Path("routing_agent/preprocess_maps/maps.config.json")
@@ -175,11 +179,16 @@ def testMergeMaps():
         mapPath=str(filepath.parent)+"/"+configData[mapid]["file_path"]
         mapData=ConvertDataFormat.loadJSONFile(mapPath)
         configData[mapid]["file_data"]=mapData
-    #print(configData)
-    graph=mergeWaypointGraph(configData)
-    return graph
+    new={}
+    new["merged_file_data"]=configData
+    new["merged_file_location"]="test"
     #print(convertWaypointGraphToJSON(graph))
-    #print(graph.convertToDistanceMatrix())
+    
+    graph=mergeWaypointGraph(new)
+    print(graph.convertToJSON())
+    saveJSONAt(graph.convertToJSON(),"test.json")
+    return graph
+    
     
 
 
