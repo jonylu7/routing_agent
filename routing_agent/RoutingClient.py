@@ -43,9 +43,9 @@ def main(args=None):
                     'Service call failed %r' % (e,))
             else:
                 print(response.response_data)
-                response_data=json.loads(response.response_data)
+                #response_data=json.loads(response.response_data)
                 routingClient.get_logger().info(
-                    'Routes: '+str(response_data)+"\nRoutesWithLocations"
+                    'Routes: '+str(response.response_data)+"\nRoutesWithLocations"
                     )  # CHANGE
             break
 

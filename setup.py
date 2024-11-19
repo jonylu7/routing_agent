@@ -15,6 +15,8 @@ setup(
         ('lib/' + package_name, [package_name+'/Task.py']),
         ('lib/' + package_name, [package_name+'/Vehicle.py']),
          ('lib/' + package_name, [package_name+'/Vector.py']),
+          ('lib/' + package_name, [package_name+'/OR.py']),
+          ('lib/' + package_name, [package_name+'/RoutingAgentExport.py']),
         ('lib/' + package_name, [package_name+'/Node.py']),
         ('lib/' + package_name, [package_name+'/WaypointGraph.py']),
         ('lib/' + package_name, [package_name+'/RoutingEngine.py']),

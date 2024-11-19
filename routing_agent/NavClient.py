@@ -17,7 +17,12 @@ class NavClient(Node):
         
                                            # CHANG
     def send_request(self):
-        self.req.can_arrive=sys.argv[1]
+        if(sys.argv[1]=="T"):
+            self.req.can_arrive=True
+        elif(sys.argv[1]=="F"):
+             self.req.can_arrive=False
+        else:
+            raise KeyError("Please input correct can_arrive format")
         self.req.i_am_at=sys.argv[2]
         self.future = self.cli.call_async(self.req)
         
