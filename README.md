@@ -1,8 +1,6 @@
 Graph based routing engine with switch map engine which build with ROS ecosystem.
 Can coupled with Nav2 later on. 
 
-# Instructions
-
 # Setup and Execution Instructions
 
 ## 1. Clone the Repositories into the ROS Workspace
