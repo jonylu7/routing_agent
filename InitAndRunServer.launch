@@ -1,0 +1,10 @@
+<launch>
+    <!-- Start the routing_agent server -->
+    <node name="routing_agent_server" pkg="routing_agent" type="server" output="screen" />
+
+    <!-- Load the graph using routing_agent loadGraph -->
+    <node name="routing_agent_loader" pkg="routing_agent" type="loadGraph" output="screen">
+        <!-- Example of passing arguments to loadGraph -->
+        <param name="graph_file" value="$(find routing_agent)/routing_agent/test.json" />
+    </node>
+</launch>
