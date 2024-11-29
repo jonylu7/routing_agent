@@ -20,6 +20,7 @@ setup(
         ('lib/' + package_name, [package_name+'/Node.py']),
         ('lib/' + package_name, [package_name+'/WaypointGraph.py']),
         ('lib/' + package_name, [package_name+'/RoutingEngine.py']),
+('lib/' + package_name, [package_name+'/PreprocessToolkit.py'])
     ],
     install_requires=['setuptools'],
     zip_safe=True,
