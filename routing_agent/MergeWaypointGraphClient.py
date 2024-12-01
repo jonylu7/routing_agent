@@ -11,7 +11,7 @@ defaultFileName="MergedWaypointGraph.json"
 class MergeWaypointGraphClient(Node):
 
     def __init__(self):
-        super().__init__('MergeWaypointGraphClient')
+        super().__init__('merge_waypointgraph')
         self.cli = self.create_client(MergeWaypointGraphServiceMsg, 'MergeWaypointGraphService')       # CHANGE
         while not self.cli.wait_for_service(timeout_sec=1.0):
             self.get_logger().info('service not available, waiting again...')

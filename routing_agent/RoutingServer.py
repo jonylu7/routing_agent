@@ -15,7 +15,7 @@ class RoutingServer(Node):
     routingEngine:RoutingEngine
 
     def __init__(self):
-        super().__init__('routing_service')
+        super().__init__('routing_server')
         self.loadWaypointGraphService=self.create_service(LoadWaypointGraphServiceMsg,"LoadWaypointGraphService",self.LoadWaypointGraphServiceCallBack)
         self.mergeWaypointGraphService=self.create_service(MergeWaypointGraphServiceMsg,"MergeWaypointGraphService",self.MergeWaypointGraphServiceCallBack)
         self.routingService = self.create_service(RoutingServiceMsg, 'RoutingService', self.RoutingServiceCallBack)

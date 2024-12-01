@@ -9,7 +9,7 @@ import json
 class LoadWaypointGraphClient(Node):
 
     def __init__(self):
-        super().__init__('minimal_client_async')
+        super().__init__('load_waypointgraph')
         self.cli = self.create_client(LoadWaypointGraphServiceMsg, 'LoadWaypointGraphService')       # CHANGE
         while not self.cli.wait_for_service(timeout_sec=1.0):
             self.get_logger().info('service not available, waiting again...')

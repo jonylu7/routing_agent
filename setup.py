@@ -4,12 +4,13 @@ package_name = 'routing_agent'
 
 setup(
     name=package_name,
-    version='0.0.0',
+    version='1.0.0',
     packages=find_packages(exclude=['test']),
     data_files=[
         ('share/ament_index/resource_index/packages',
             ['resource/' + package_name]),
         ('share/' + package_name, ['package.xml']),
+        ('share/' + package_name, ['launch/InitAndRun.launch.py']),
         ('lib/' + package_name, [package_name+'/ConvertDataFormat.py']),
         ('lib/' + package_name, [package_name+'/FindPath.py']),
         ('lib/' + package_name, [package_name+'/Task.py']),
@@ -32,7 +33,7 @@ setup(
     entry_points={
         'console_scripts': [
             'server = routing_agent.RoutingServer:main',
-            'routingClient = routing_agent.RoutingClient:main',
+            'loadAndRoute = routing_agent.RoutingClient:main',
             'loadGraph = routing_agent.LoadWaypointGraphClient:main',
             'mergeGraph = routing_agent.MergeWaypointGraphClient:main',
             'nav = routing_agent.NavClient:main',

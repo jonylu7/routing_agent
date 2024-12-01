@@ -9,8 +9,8 @@ import json
 class RoutingClient(Node):
 
     def __init__(self):
-        super().__init__('minimal_client_async')
-        self.cli = self.create_client(RoutingServiceMsg, 'RoutingService')       # CHANGE
+        super().__init__('load_tasks_and_vehicles')
+        self.cli = self.create_client(RoutingServiceMsg, 'routing_server')       # CHANGE
         while not self.cli.wait_for_service(timeout_sec=1.0):
             self.get_logger().info('service not available, waiting again...')
         self.req = RoutingServiceMsg.Request()
