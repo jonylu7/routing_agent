@@ -4,13 +4,14 @@ package_name = 'routing_agent'
 
 setup(
     name=package_name,
-    version='1.0.0',
+    version='1.1.0',
     packages=find_packages(exclude=['test']),
     data_files=[
         ('share/ament_index/resource_index/packages',
             ['resource/' + package_name]),
         ('share/' + package_name, ['package.xml']),
         ('share/' + package_name, ['launch/InitAndRun.launch.py']),
+         ('share/' + package_name, ['launch/RunServer.launch.py']),
         ('lib/' + package_name, [package_name+'/ConvertDataFormat.py']),
         ('lib/' + package_name, [package_name+'/FindPath.py']),
         ('lib/' + package_name, [package_name+'/Task.py']),
@@ -21,6 +22,8 @@ setup(
         ('lib/' + package_name, [package_name+'/Node.py']),
         ('lib/' + package_name, [package_name+'/WaypointGraph.py']),
         ('lib/' + package_name, [package_name+'/RoutingEngine.py']),
+        ('lib/' + package_name, [package_name+'/RoutingClient.py']),
+         ('lib/' + package_name, [package_name+'/RoutingServer.py']),
 ('lib/' + package_name, [package_name+'/PreprocessToolkit.py'])
     ],
     install_requires=['setuptools'],
@@ -33,7 +36,7 @@ setup(
     entry_points={
         'console_scripts': [
             'server = routing_agent.RoutingServer:main',
-            'loadAndRoute = routing_agent.RoutingClient:main',
+            'routingClient = routing_agent.RoutingClient:main',
             'loadGraph = routing_agent.LoadWaypointGraphClient:main',
             'mergeGraph = routing_agent.MergeWaypointGraphClient:main',
             'nav = routing_agent.NavClient:main',
