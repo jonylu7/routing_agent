@@ -28,9 +28,22 @@ Start the routing agent server:
 ros2 run routing_agent server
 ```
 
-## 4. Execute the Routing Agent
+## 4-1. Execute the Routing Agent with simple 'ros2 launch'
+
+### a. Clone the 'test_run' repo into the workspace directory 
+Make sure the 'sample_data' folder should be inside the 'test_run' directory
+
+### b. Launch
+
+```bash
+ros2 launch routing_agent runServer.launch.py
+```
+
+## 4-2. Execute the Routing Agent with old fashion 'ros2 run'
 
 ### a. Open a New Terminal Window and Navigate to the ROS Workspace
+
+You should choose either b or c to execute.
 
 ### b. Load the Waypoint Graph
 
