@@ -2,15 +2,13 @@ from routing_agent_interfaces.srv import NavServiceMsg               # CHANGE
 import sys
 import rclpy
 from rclpy.node import Node
-import ConvertDataFormat
-import json
 
 
 class NavClient(Node):
 
     def __init__(self):
-        super().__init__('nav')
-        self.cli = self.create_client(NavServiceMsg, 'nav')       # CHANGE
+        super().__init__('goal_path')
+        self.cli = self.create_client(NavServiceMsg, 'nav')  #goal_path     # CHANGE
         while not self.cli.wait_for_service(timeout_sec=1.0):
             self.get_logger().info('service not available, waiting again...')
         self.req = NavServiceMsg.Request()
@@ -25,6 +23,7 @@ class NavClient(Node):
             raise KeyError("Please input correct can_arrive format")
         self.req.i_am_at=sys.argv[2]
         self.future = self.cli.call_async(self.req)
+
         
 
 def main(args=None):
