@@ -5,13 +5,13 @@ class Task:
         self.locationNode=locationnode
         self.demand=demand
 def loadTasksData(waypointGraph:WaypointGraph,taskdata):
-    vehicleSize=len(taskdata["task_sequence"])
+    taskSize=len(taskdata["task_sequence"])
     tasks=[]
-    for i in range(vehicleSize):
+    for i in range(taskSize):
         try:
             node=waypointGraph.getNodeById(taskdata["task_sequence"][i])
         except:
             raise KeyError("Failed to load task data, can't match task node with waypointgraph")
         demand=taskdata["task_sequence"][i]
-        tasks.append(Vehicle(node,demand))
+        tasks.append(Task(node,demand))
     return tasks

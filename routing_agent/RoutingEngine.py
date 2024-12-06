@@ -62,19 +62,26 @@ class RoutingEngine:
 
 
     def solve(self):
-        costMatrixSol,totalCost=self.__solveTSP()
-        solutionId=[]
-        for index in costMatrixSol:
-            solutionId.append(self.nodeIndex[index])
-        self.routeAtNextUpdate=True
-        self.taskSequence=solutionId
-        return solutionId
+        if(len(self.taskList)>1):
+            costMatrixSol,totalCost=self.__solveTSP()
+            solutionId=[]
+            for index in costMatrixSol:
+                solutionId.append(self.nodeIndex[index])
+            self.routeAtNextUpdate=True
+            self.taskSequence=solutionId
+        elif(len(self.taskList)==1):
+            self.routeAtNextUpdate=True
+            self.taskSequence=[self.fleet[0].locationNode.id,self.taskList[0].locationNode.id,self.fleet[0].locationNode.id]
+        else:
+            raise KeyError("Failed to solve, Not Enough Task in Task list")
+
+        return self.taskSequence
     
 
-    def findPathBetweenTwoPoints(self,fromnodeid,tonodeid):
+    def findPathBetweenTwoPoints(self,fromnodeid:str,tonodeid:str):
         if(fromnodeid==tonodeid):
             return [],0
-        print(self.occupiedDijGraph)
+        #print(self.occupiedDijGraph)
         fromIndex=self.nodeIndex.index(fromnodeid)
         toIndex=self.nodeIndex.index(tonodeid)
         distance,dijpathToAll=FindPath.dijkstra(self.occupiedDijGraph,fromIndex)
@@ -85,7 +92,7 @@ class RoutingEngine:
         for p in path:
            idPath.append(self.nodeIndex[p])
            distanceEstimate.append(distance[p])
-        print(idPath)
+        #print(idPath)
         return idPath,distanceEstimate
 
     def __prunCostMatrix(self,costMatrix,orders):
@@ -107,7 +114,7 @@ class RoutingEngine:
     def update(self,currentnodeid):
         # route
         if(self.routeAtNextUpdate or len(self.latestSolutionPath)==1):
-            print(self.taskSequence)
+            #print(self.taskSequence)
             if(currentnodeid in self.taskSequence):
                 self.taskSequence.pop(self.taskSequence.index(currentnodeid))
 
@@ -125,10 +132,15 @@ class RoutingEngine:
         if(currentnodeid in self.latestSolutionPath):
             startindex=self.latestSolutionPath.index(currentnodeid)
             self.latestSolutionPath=self.latestSolutionPath[startindex+1::]
+        else:
+            raise KeyError("You derail from the path!")
         return self.latestSolutionPath
 
     def response(self):
-        #for 
+        #init response if theres no response
+        if(len(self.latestSolutionPath)==0):
+            self.update(self.fleet[0].locationNode.id)
+
         jsondata={}
         nodeSequence=[]
         graph={}
@@ -171,30 +183,15 @@ class RoutingEngine:
 
 def testRoutingEngine():
     graph=WaypointGraph.testLoadMap()
-    vehdata=loadJSONFile("routing_agent/vehicle_data.json")
+    vehdata=loadJSONFile("/home/csl/ros2_ws/test_run/sample_data/vehicle_data.json")
     vehicles=loadVehiclesData(graph,vehdata)
-    taskdata=loadJSONFile("routing_agent/task_data.json")
+    taskdata=loadJSONFile("/home/csl/ros2_ws/test_run/sample_data/task_data.json")
     tasks=loadTasksData(graph,taskdata)
     re=RoutingEngine(graph,tasks,vehicles)
-    print("1")
     print(re.update("000_000"))
     print(re.response())
-    print(re.update("000_000"))
-    print(re.response())
-    print(re.update("000_000"))
-    print(re.response())
-    print(re.update("000_000"))
-    print(re.response())
-    print(re.update("000_000"))
-    print(re.update("000_000"))
-    print(re.update("000_000"))
-    print(re.update("000_002"))
-    print(re.response())
-    print(re.update("001_000"))
-    print(re.response())
-    print(re.update("001_001"))
-    print(re.update("001_002"))
-    print(re.update("002_000"))
+    print(re.update("000_003"))
+    print(re.update("002_002"))
     print(re.update("002_001"))
     print(re.update("002_002"))
     print(re.update("000_003"))
