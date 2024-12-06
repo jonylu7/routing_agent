@@ -1,5 +1,6 @@
-from routing_agent_interfaces.srv import RoutingServiceMsg,MergeWaypointGraphServiceMsg,LoadWaypointGraphServiceMsg,NavServiceMsg  # CHANGE
+from routing_agent_interfaces.srv import RoutingServiceMsg,MergeWaypointGraphServiceMsg,LoadWaypointGraphServiceMsg,NavServiceMsg,GoalPathMsg  # CHANGE
 import rclpy
+
 from rclpy.node import Node
 import routing_agent.RoutingAgent as RoutingAgent
 import json
@@ -8,6 +9,7 @@ from WaypointGraph import WaypointGraph,mergeWaypointGraph,loadWaypointGraphData
 from RoutingEngine import RoutingEngine
 from Task import loadTasksData
 from Vehicle import loadVehiclesData
+import sys
 
 class RoutingServer(Node):
     isWaypointGraphLoaded=False
@@ -20,6 +22,11 @@ class RoutingServer(Node):
         self.mergeWaypointGraphService=self.create_service(MergeWaypointGraphServiceMsg,"MergeWaypointGraphService",self.MergeWaypointGraphServiceCallBack)
         self.routingService = self.create_service(RoutingServiceMsg, 'RoutingService', self.RoutingServiceCallBack)
         self.navService=self.create_service(NavServiceMsg,'NavService',self.NavServiceCallBack)
+
+        self.cli = self.create_client(GoalPathMsg, 'goal_path')  #goal_path     # CHANGE
+        while not self.cli.wait_for_service(timeout_sec=1.0):
+            self.get_logger().info('service not available, waiting again...')
+        self.req = GoalPathMsg.Request()
 
 
     def MergeWaypointGraphServiceCallBack(self,request,response):
@@ -69,6 +76,7 @@ class RoutingServer(Node):
             #change it to log... something
             raise KeyError("Please Load WaypointGraph First, use command loadGraph <waypoint_graph_file_location>")
         return response
+    
     def NavServiceCallBack(self,request,response):
         if(request.can_arrive):
             self.routingEngine.update(request.i_am_at)
@@ -81,6 +89,11 @@ class RoutingServer(Node):
 
         return response
 
+    def send_request(self):
+        self.req.path_to_next_task=convertJSONToStr(self.routingEngine.response())
+        self.future = self.cli.call_async(self.req)
+
+
         
 
 def main(args=None):
@@ -90,6 +103,25 @@ def main(args=None):
 
     rclpy.spin(routing_server)
 
+    
+    routing_server.send_request()
+
+    while rclpy.ok():
+        rclpy.spin_once(routing_server)
+        if routing_server.future.done():
+            try:
+                response = routing_server.future.result()
+            except Exception as e:
+                routing_server.get_logger().info(
+                    'Service call failed %r' % (e,))
+            else:
+                if(response.can_arrive=="T"):
+                    routing_server.routingEngine.update(response.i_am_at)
+                routing_server.get_logger().info(
+                    'PathToNextTask: '+response.i_am_at+"\n")  # CHANGE
+            break
+
+    routing_server.destroy_node()
     rclpy.shutdown()
 
 if __name__ == '__main__':
