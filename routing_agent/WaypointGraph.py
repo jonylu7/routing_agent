@@ -50,8 +50,10 @@ class WaypointGraph:
                 "edges":node.edges,
                 "local_location":node.localLocation.toList()
             }
-            if(node.isEntryPoint):
+            if(node.isEntryPoint and node.entryToNodeId not in jsondata[nodeid]["edges"]):
+                #noramally convert to CSR should add entry point to edges
                 jsondata[nodeid]["edges"].append(node.entryToNodeId)
+
         return jsondata
 
 
@@ -175,7 +177,7 @@ def testLoadMap():
 def preprocess():
 
     spacing=5
-    filepath = Path("preprocess_maps/waypoint_graph_raw.yaml")
+    filepath = Path("src/routing_agent/routing_agent/preprocess_maps/waypoint_graph_raw.yaml")
 
     yamlFile=ConvertDataFormat.loadYAMLFile(filepath)
     maps = yamlFile["entry_points"]
