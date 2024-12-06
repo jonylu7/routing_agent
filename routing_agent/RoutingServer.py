@@ -67,7 +67,7 @@ class RoutingServer(Node):
 
         else:
             #change it to log... something
-            print("Please Load WaypointGraph First, use command loadGraph <waypoint_graph_file_location>")
+            raise KeyError("Please Load WaypointGraph First, use command loadGraph <waypoint_graph_file_location>")
         return response
     def NavServiceCallBack(self,request,response):
         if(request.can_arrive):
