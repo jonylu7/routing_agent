@@ -25,7 +25,6 @@ setup(
         ('lib/' + package_name, [package_name+'/RoutingClient.py']),
          ('lib/' + package_name, [package_name+'/RoutingServer.py']),
 ('lib/' + package_name, [package_name+'/PreprocessToolkit.py']),
-('lib/' + package_name, [package_name+'/DummyServer.py'])
     ],
     install_requires=['setuptools'],
     zip_safe=True,
@@ -40,8 +39,7 @@ setup(
             'routingClient = routing_agent.RoutingClient:main',
             'loadGraph = routing_agent.LoadWaypointGraphClient:main',
             'mergeGraph = routing_agent.MergeWaypointGraphClient:main',
-            'nav = routing_agent.NavClient:main',
-            'dummy = routing_agent.DummyServer:main'
+            'nav = routing_agent.NavClient:main'
         ],
     },
 )

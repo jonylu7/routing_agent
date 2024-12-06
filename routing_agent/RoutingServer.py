@@ -23,11 +23,6 @@ class RoutingServer(Node):
         self.routingService = self.create_service(RoutingServiceMsg, 'RoutingService', self.RoutingServiceCallBack)
         self.navService=self.create_service(NavServiceMsg,'NavService',self.NavServiceCallBack)
 
-        self.cli = self.create_client(GoalPathMsg, 'goal_path')  #goal_path     # CHANGE
-        while not self.cli.wait_for_service(timeout_sec=1.0):
-            self.get_logger().info('service not available, waiting again...')
-        self.req = GoalPathMsg.Request()
-
 
     def MergeWaypointGraphServiceCallBack(self,request,response):
         mapsConfigData=json.loads(request.maps_config_data)
@@ -89,10 +84,6 @@ class RoutingServer(Node):
 
         return response
 
-    def send_request(self):
-        self.req.path_to_next_task=convertJSONToStr(self.routingEngine.response())
-        self.future = self.cli.call_async(self.req)
-
 
         
 
@@ -106,22 +97,6 @@ def main(args=None):
     
     routing_server.send_request()
 
-    while rclpy.ok():
-        rclpy.spin_once(routing_server)
-        if routing_server.future.done():
-            try:
-                response = routing_server.future.result()
-            except Exception as e:
-                routing_server.get_logger().info(
-                    'Service call failed %r' % (e,))
-            else:
-                if(response.can_arrive=="T"):
-                    routing_server.routingEngine.update(response.i_am_at)
-                routing_server.get_logger().info(
-                    'PathToNextTask: '+response.i_am_at+"\n")  # CHANGE
-            break
-
-    routing_server.destroy_node()
     rclpy.shutdown()
 
 if __name__ == '__main__':
