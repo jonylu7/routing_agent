@@ -127,7 +127,8 @@ class RoutingEngine:
             idPath,distanceEstimates=self.findPathBetweenTwoPoints(currentnodeid,nextTaskId)
             self.latestSolutionPath=idPath
             self.routeAtNextUpdate=False
-
+        #print("Y")
+        #print(self.latestSolutionPath)
         #update solutionpath
         if(currentnodeid in self.latestSolutionPath):
             startindex=self.latestSolutionPath.index(currentnodeid)
@@ -137,9 +138,6 @@ class RoutingEngine:
         return self.latestSolutionPath
 
     def response(self):
-        #init response if theres no response
-        if(len(self.latestSolutionPath)==0):
-            self.update(self.fleet[0].locationNode.id)
 
         jsondata={}
         nodeSequence=[]
@@ -191,11 +189,9 @@ def testRoutingEngine():
     print(re.update("000_000"))
     print(re.response())
     print(re.update("000_003"))
-    print(re.update("002_002"))
+    print(re.response())
+    print(re.update("001_006"))
     print(re.update("002_001"))
-    print(re.update("002_002"))
-    print(re.update("000_003"))
-    print(re.update("000_000"))
 
 
 if __name__=="__main__":
@@ -207,15 +203,6 @@ if __name__=="__main__":
     
 
         
-
-
-
-
-
-
-
-        
-
 
 
 

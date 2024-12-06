@@ -7,9 +7,8 @@ from rclpy.node import Node
 from launch import LaunchContext, LaunchDescription, LaunchService
 from launch.actions import RegisterEventHandler
 from launch.events.process import ProcessStarted
-from launch.event_handlers.on_process_start import OnProcessStart
 from launch_ros.actions import Node
-from launch.event_handlers import OnProcessExit
+from launch.event_handlers import OnProcessExit,OnExecutionComplete,OnProcessStart
 
 
 def generate_launch_description():
@@ -28,20 +27,14 @@ def generate_launch_description():
     )
 
     process_3_after_2 = RegisterEventHandler(
-        OnProcessExit(
+        OnExecutionComplete(
             target_action=loadGraphArg,
-            on_exit=[loadTaskAndVehicleArg]
+            on_completion=[loadTaskAndVehicleArg]
         )
     )
 
 
     return LaunchDescription([
-        #RegisterEventHandler(event_handler=OnProcessStart(target_action=runServer,
-        #                                                  on_start=start_next_node)),
-        #RegisterEventHandler(event_handler=OnProcessStart(target_action=loadGraphArg,
-        #                                                  on_start=start_next_node)),
-        #RegisterEventHandler(event_handler=OnProcessStart(target_action=loadTaskAndVehicleArg,
-        #                                                  on_start=start_next_node)),
         runServer,
         process_2_after_1,
         process_3_after_2,

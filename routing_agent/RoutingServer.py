@@ -94,9 +94,6 @@ def main(args=None):
 
     rclpy.spin(routing_server)
 
-    
-    routing_server.send_request()
-
     rclpy.shutdown()
 
 if __name__ == '__main__':
